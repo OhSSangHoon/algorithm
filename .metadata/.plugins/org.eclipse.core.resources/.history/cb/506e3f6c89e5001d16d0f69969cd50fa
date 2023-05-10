@@ -1,0 +1,67 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
+
+public class ContentRecommender {
+    public static void main(String[] args) {
+        String fileName = "small.txt";
+        int targetUser;
+        int numberOfReferees;
+        int numberOfRecommendations;
+
+        // 명령행 인수를 사용하여 값을 설정합니다.
+        if (args.length >= 4) {
+            fileName = args[0];
+            targetUser = Integer.parseInt(args[1]);
+            numberOfReferees = Integer.parseInt(args[2]);
+            numberOfRecommendations = Integer.parseInt(args[3]);
+        } else {
+            System.out.println("사용법: java ContentRecommender <파일명> <목표 사용자> <참고인 수> <추천 항목 수>");
+            return;
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+            int numberOfUsers = Integer.parseInt(reader.readLine());
+
+            List<List<Integer>> usersContentScores = new ArrayList<>();
+            for (int i = 0; i < numberOfUsers; i++) {
+                String[] scores = reader.readLine().split(" ");
+                List<Integer> contentScores = new ArrayList<>();
+                for (String score : scores) {
+                    contentScores.add(Integer.parseInt(score));
+                }
+                usersContentScores.add(contentScores);
+            }
+
+            // 평균 점수를 계산합니다.
+            List<Double> averageScores = new ArrayList<>(Collections.nCopies(usersContentScores.get(0).size(), 0.0));
+            for (int i = 0; i < numberOfReferees; i++) {
+                for (int j = 0; j < usersContentScores.get(i).size(); j++) {
+                    averageScores.set(j, averageScores.get(j) + usersContentScores.get(i).get(j));
+                }
+            }
+            for (int j = 0; j < averageScores.size(); j++) {
+                averageScores.set(j, averageScores.get(j) / numberOfReferees);
+            }
+
+            // 추천 항목을 찾습니다.
+            PriorityQueue<Map.Entry<Integer, Double>> recommendations = new PriorityQueue<>(
+                    (entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue())
+            );
+            for (int i = 0; i < averageScores.size(); i++) {
+                recommendations.offer(new AbstractMap.SimpleEntry<>(i, averageScores.get(i)));
+            }
+
+            // 상위 k개의 추천 항목을 출력합니다.
+            System.out.println("상위 " + numberOfRecommendations + "개의 추천 항목:");
+            for (int i = 0; i < numberOfRecommendations; i++)
+                if (!recommendations.isEmpty()) {
+                    Map.Entry<Integer, Double> recommendation = recommendations.poll();
+                    System.out.println("항목 " + recommendation.getKey() + ": 점수 " + recommendation.getValue());
+                }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -1,0 +1,23 @@
+public class MSD {
+	
+	private static void sort(String[] a, int lo, int hi, int d) {
+		if(hi <= lo + M)
+	}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String[] a = {"sea", "seashells", "sells", "she", "she", "shells", "shore", "surely"};
+		
+		int n = a.length;
+		
+		//System.out.println(n);
+		
+		int maxLen = 0;
+		
+		for(int i =0; i < n; i++) {
+			if(maxLen < n)
+				maxLen = n;
+		}
+	}
+
+}

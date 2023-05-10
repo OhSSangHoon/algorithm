@@ -1,0 +1,7 @@
+package exam;
+import java.util.*;
+
+//이름을 4개 입력받아 ArrayList에 저장하고 모두 출력한 후 제일 긴 이름을 출력하라.
+public class ArrayListEx {
+	
+}

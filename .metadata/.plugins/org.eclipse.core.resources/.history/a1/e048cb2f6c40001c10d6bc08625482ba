@@ -1,0 +1,16 @@
+package exam;
+import java.util.*;
+
+//이름을 4개 입력받아 ArrayList에 저장하고 모두 출력한 후 제일 긴 이름을 출력하라.
+public class ArrayListEx {
+	//문자열만 삽입가능한 ArrayList 컬렉션 생성
+	ArrayList<String> a = new ArrayList<String>();
+	
+	//키보드로부터 4개의 이름 입력받아 ArrayList에 삽입
+	Scanner sc = new Scanner(System.in);
+	
+	for(int i=0; i<4; i++) {
+			
+		
+	}
+}

@@ -1,0 +1,19 @@
+public class MSD {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String[] a = {"sea", "seashells", "sells", "she", "she", "shells", "shore", "surely"};
+		
+		int n = a.length;
+		
+		//System.out.println(n);
+		
+		int maxLen;
+		
+		for(int i =0; i < n; i++) {
+			if(maxLen > n)
+				maxLen = n;
+		}
+	}
+
+}

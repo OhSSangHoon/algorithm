@@ -1,0 +1,18 @@
+public class StrBuilder {
+    public static String reverse(String s) {
+        // java.lang.StringBuilder를 사용하여 문자열 뒤집기
+        StringBuilder rev = new StringBuilder();
+
+        for (int i = s.length() - 1; i >= 0; i--) {
+            rev.append(s.charAt(i));
+        }
+
+        return rev.toString();
+    }
+
+    public static void main(String[] args) {
+        String a = "hello";
+
+        System.out.println(reverse(a));
+    }
+}

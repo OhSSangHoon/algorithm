@@ -1,0 +1,43 @@
+import java.io.*;
+import java.util.*;
+import java.util.*;
+
+public class HW1 {
+    public static void main(String[] args) {
+        int targetUser;
+        int userNumber;
+        int category;
+        
+        Scanner sc = new Scanner(System.in);
+        String fileName = sc.nextLine();
+        targetUser = sc.nextInt();
+        userNumber = sc.nextInt();
+        category = sc.nextInt();
+        sc.close();
+        
+        
+        FileProcessor fileProcessor = new FileProcessor();
+
+        try {
+            fileProcessor.readFileAndPrintContent(fileName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static class FileProcessor {
+        private void readFileAndPrintContent(String fileName) throws IOException {
+            try (BufferedReader reader = new BufferedReader(new FileReader(fileName))) {
+                System.out.println("파일 내용: " + fileName);
+                String line;
+                int target;
+                int usernum;
+                int cate;
+                while ((line = reader.readLine()) != null) {
+                    System.out.println(line);
+                }
+                System.out.println();
+            }
+        } 
+    }
+}

@@ -1,0 +1,165 @@
+import java.io.*;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.*;
+
+public class HW1{
+		
+	public static void main(String[] args) {
+		Scanner sc = new Scanner(System.in);
+		String fileName = sc.next();
+		int targetUser = sc.nextInt();
+		int topN = sc.nextInt();
+		
+		try {
+			File file = new File(fileName);
+			Scanner fileScanner = new Scanner(file);
+			ArrayList<String> contents = new ArrayList<>();
+			HashMap<String, Integer> contentScores = new HashMap<>();
+			HashMap<String, Integer> contentCounts = new HashMap<>();
+			HashMap<String, Integer> targetUserContentScores = new HashMap<>();
+			HashMap<Integer, HashMap<String, Integer>> userContentScores = new HashMap<>();
+			
+			
+			if(fileScanner.hasNextLine()) {
+				fileScanner.nextLine();
+			}
+			
+			int userContentSum = 0;
+			
+			while(fileScanner.hasNextLine()) {
+				String line = fileScanner.nextLine();
+				String[] parts = line.split(" ");
+				
+				int user = Integer.parseInt(parts[0]);
+				String content = parts[1];
+				int score = Integer.parseInt(parts[2]);
+				
+				if(user == targetUser) {
+					contents.add(content);
+					targetUserContentScores.put(content, score);
+					userContentSum += score;
+				}
+				
+				contentScores.put(content, contentScores.getOrDefault(content, 0) + score);
+				contentCounts.put(content, contentCounts.getOrDefault(content, 0) + 1);
+				
+				userContentScores.putIfAbsent(user, new HashMap<>());
+				userContentScores.get(user).put(content, score);
+			}
+			fileScanner.close();
+			
+			Collections.sort(contents, new Comparator<String>() {
+				public int compare(String o1, String o2) {
+					Pattern pattern = Pattern.compile("(\\D+)(\\d+)");
+					Matcher m1 = pattern.matcher(o1);
+					Matcher m2 = pattern.matcher(o2);
+					
+					if(m1.find() && m2.find()) {
+						int charCompare = m1.group(1).compareTo(m2.group(1));
+						if(charCompare != 0) {
+							return charCompare;
+						}else {
+							int num1 = Integer.parseInt(m1.group(2));
+							int num2 = Integer.parseInt(m2.group(2));
+							return Integer.compare(num1, num2);
+						}
+					}
+					return o1.compareTo(o2);
+				}
+			});
+			
+			System.out.println("1.사용자" + targetUser + "의 콘텐츠와 정규화 점수: ");
+			System.out.print("[");
+			for(String content: contents) {
+				double targetUserScore = targetUserContentScores.get(content);
+		        double totalContentScore = (double) contentScores.get(content) / contentCounts.get(content);
+		        double userContentAverage = (double) userContentSum / contents.size();
+		        double average = targetUserScore - userContentAverage;
+		        
+				System.out.printf("(%s, %.3f)", content, average);
+				if(contents.indexOf(content) != contents.size() - 1) {
+					System.out.print(", ");
+				}
+			}
+			System.out.print("]\n\n\n");
+			
+			HashMap<Integer, Double> userAverages = new HashMap<>();
+			for(Integer user : userContentScores.keySet()) {
+				HashMap<String, Integer> userScores = userContentScores.get(user);
+				int userSum = 0;
+				for(int score : userScores.values()) {
+					userSum += score;
+				}
+				userAverages.put(user, (double) userSum / userScores.size());
+			}
+			
+			System.out.println("2.유사한 사용자 id와 유사도 리스트");
+			ArrayList<Map.Entry<Integer, Double>> similarityList = new ArrayList<>();
+			for(Integer user : userContentScores.keySet()) {
+				if(user != targetUser) {
+					double similarity = calculateCosineSimilarity(targetUserContentScores, userContentScores.get(user), userAverages, targetUser, user);
+					similarityList.add(new AbstractMap.SimpleEntry<>(user, similarity));
+				}
+			}
+			
+			
+			Collections.sort(similarityList, (o1, o2) -> {
+				if(o1.getKey() > o2.getKey()) {
+					return -1;
+				}else if(o1.getKey() < o2.getKey()) {
+					return 1;
+				}else {
+					return Integer.compare(o1.getKey(), o2.getKey());
+				}
+			});
+			
+			System.out.println("2.유사한 사용자 id와 유사도 리스트");
+			for(int i =0; i < topN; i++) {
+				Map.Entry<Integer, Double> entry = similarityList.get(i);
+				System.out.printf("사용자 id: %d, 유사도: %.6f\n", entry.getKey(), entry.getValue());
+			}
+			
+		} catch(FileNotFoundException e) {
+			System.out.println("File not found.");
+		}
+	}
+
+	private static double calculateCosineSimilarity(HashMap<String, Integer> targetUserScores,
+	HashMap<String, Integer> otherUserScores, HashMap<Integer, Double> userAverages, int targetUser, int otherUser) {
+		double dotProduct = 0.0;
+		double targetUserSquaredSum = 0.0;
+		double otherUserSquaredSum = 0.0;
+		
+		double targetUserAverage = userAverages.get(targetUser);
+		double otherUserAverage = userAverages.get(otherUser);
+		
+		
+		for(String content : targetUserScores.keySet()) {
+			int targetUserScore = targetUserScores.get(content);
+			double targetUserNoramlizedScore = targetUserScore - targetUserAverage;
+			targetUserSquaredSum += targetUserNoramlizedScore * targetUserNoramlizedScore;
+			
+			if(otherUserScores.containsKey(content)) {
+				int otherUserScore = otherUserScores.get(content);
+				double otherUserNormalizedScore = otherUserScore - otherUserAverage;
+				
+				dotProduct += targetUserNoramlizedScore  * otherUserNormalizedScore;
+			}
+		}
+		
+		for(int otherUserScore : otherUserScores.values()) {
+			double otherUserNormalizedScore = otherUserScore - otherUserAverage;
+			otherUserSquaredSum += otherUserNormalizedScore * otherUserScore;
+		}
+		
+		targetUserSquaredSum = Math.sqrt(targetUserSquaredSum);
+		otherUserSquaredSum = Math.sqrt(otherUserSquaredSum);
+		
+		if(targetUserSquaredSum == 0.0 || otherUserSquaredSum == 0.0) {
+			return 0.0;
+		}else {
+			return dotProduct / (targetUserSquaredSum * otherUserSquaredSum);
+		}
+	}
+}

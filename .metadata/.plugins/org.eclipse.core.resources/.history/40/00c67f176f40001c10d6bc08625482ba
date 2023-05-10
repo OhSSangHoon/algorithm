@@ -1,0 +1,26 @@
+package exam;
+import java.util.*;
+
+public class IteratorEx {
+
+	//예제 7-1의 코드를 Iterator<Integer>을 이용하여 수정하라.
+	public static void main(String[] args) {
+		//정수 값만 다루는 제네릭 vector 생성
+		Vector<Integer> v = new Vector<Integer>();
+		v.add(5);
+		v.add(4);
+		v.add(-1);
+		v.add(2, 100); //4와 -1사이에 정수 100 삽입
+		
+		//Iterator를 이용한 모든 정수 출력하기
+		Iterator<Integer> it = v.iterator();
+		while(it.hasNext()) {
+			int n = it.next();
+			System.out.println(n);
+		}
+		//iterator을 이용하여 모든 정수 더하기
+		int sum = 0;
+
+	}
+
+}
