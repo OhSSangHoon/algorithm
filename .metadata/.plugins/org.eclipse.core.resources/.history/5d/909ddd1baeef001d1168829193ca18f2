@@ -1,0 +1,14 @@
+//Text의 모든 위치에서 시작되는 pattern을 검사
+public class BFAlgorithm {
+	
+	public void search(String pat, String txt) {
+		int M = pat.length();
+	}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		String[] s = {"A","B","A","C","A","D","A","B","R","A","C"};
+
+	}
+
+}
