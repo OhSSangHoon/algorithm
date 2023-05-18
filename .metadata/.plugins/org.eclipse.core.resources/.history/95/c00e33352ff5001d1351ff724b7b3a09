@@ -1,0 +1,18 @@
+public class Tries<Value> {
+	private static int R = 256; //ASCII ±â¼ö
+	private Node root;
+	private int N;
+
+	private class Node{
+		private Object val;
+		private Object[] next = new Object[R];
+	}
+	
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		
+		String[] a = { "by", "sea", "sells", "she", "shells", "shore", "the" }
+
+	}
+
+}
