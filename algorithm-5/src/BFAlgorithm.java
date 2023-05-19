@@ -4,7 +4,7 @@ import java.util.Scanner;
 public class BFAlgorithm {
 	
 	public static int search(String pat, String txt) {
-		int M = pat.length(); //pattern 길이
+		int M = pat.length(); //pattern 길이 M > N
 		int N = txt.length(); //text 길이
 		for(int i =0; i <= N - M; i++) {
 			int j;

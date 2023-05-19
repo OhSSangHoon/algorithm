@@ -28,11 +28,11 @@ public class StrBuilder {
 		//ol
 		//oll
 		//olle
-		//garbage data »ý¼º
+		//garbage data ï¿½ï¿½ï¿½ï¿½
 		//olleh
 		
-		//ÇØ°á ¹æ¾È
-		//String Builder »ç¿ë
+		//ï¿½Ø°ï¿½ ï¿½ï¿½ï¿½
+		//String Builder ï¿½ï¿½ï¿½
 	}
 
 }
