@@ -65,7 +65,8 @@ public class HW1{
 				
 				contentCounts.put(content, contentCounts.getOrDefault(content, 0) + 1 );//(사용자들에 의해 평가된 횟수를 추적함)콘텐츠의 등장횟수를 저장
 				
-				//있으면 user의 데이터가 있는 맵을 가져오고, 없으면 새로운 맵 생성 
+				//있으면 user의 데이터가 있는 맵을 가져오고, 없으면 새로운 맵 생성
+				//target user는 이미 위에서 만들어졌으니 userContentScores에 들어가지 않는다.
 				userContentScores.putIfAbsent(user, new HashMap<>());
 				
 				//user들이 평가한 콘텐츠를 읽어 content와 점수를 저장 user = key
@@ -137,30 +138,38 @@ public class HW1{
 				}
 			}
 			System.out.print("]\n\n\n");
-			//여기까지함
 			
-			//userAverages 맵 생성
+			//(사용자ID, 평균 점수)를 가지는 userAverages 맵 생성
 			HashMap<Integer, Double> userAverages = new HashMap<>();
-			//사용자별콘텐츠점수에 대해 반복문을 실행
+			
+			//userContentScores의 사용자ID(key)를 하나씩 user에 할당하여 반복문 실행
 			for(Integer user : userContentScores.keySet()) {
-				//각 사용자의 콘텐츠 점수를 가져온 후 
+				//각 사용자의 content, score를 userScores에 복사 
 				HashMap<String, Integer> userScores = userContentScores.get(user);
+				
 				int userSum = 0;
+				//위에서 받은 userScores 각 사용자에 대한 콘텐츠의 점수를 score에 할당
 				for(int score : userScores.values()) {
 					userSum += score;//모든 콘텐츠 점수의 합을 구하고
 				}
-				//모든 콘텐츠 점수의 합 / 콘텐츠크기로 평균을 구한뒤 처음애 만든 userAverages 맵에 저장
+				//모든 사용자의 콘텐츠 점수 평균을 구한뒤 처음애 만든 userAverages 맵에 저장
 				userAverages.put(user, (double) userSum / userScores.size());
 				//사용자별 콘텐츠 점수의 평균
 			}
 			
 			//유사도 리스트라는 arrayList 선언
 			ArrayList<Map.Entry<Integer, Double>> similarityList = new ArrayList<>();
+			
+			//각 사용자 ID를 user에 할당 반복문 실행
 			for(Integer user : userContentScores.keySet()) {
 				//타겟 사용자와 다른 사용자들 간의
 				if(user != targetUser) {
 					//코사인 유사도로 계산한 함수를 similarity에 저장
+					//대상 사용자의 콘텐츠 점수, 다른 사용자들의 콘텐츠 점수, 모든 사용자의 콘텐츠 점수 평균, 대상 사용자, 다른 사용자
 					double similarity = calculateCosineSimilarity(targetUserContentScores, userContentScores.get(user), userAverages, targetUser, user);
+					//targetUser의 콘텐츠 점수 맵과 user의 콘텐츠 점수 맵을 가져와 userAverage와 유사도 계산을 실시
+					
+					
 					//사용자 id와 유사도를 arrayList에 저장 (Key(정수), Value(실수))
 					similarityList.add(new AbstractMap.SimpleEntry<>(user, similarity));
 				}
@@ -274,16 +283,18 @@ public class HW1{
 		double dotProduct = 0.0;
 		double targetUserSquaredSum = 0.0;
 		double otherUserSquaredSum = 0.0;
+		
 		//각 사용자의 평균 평점을 가져온다.
 		double targetUserAverage = userAverages.get(targetUser);
 		double otherUserAverage = userAverages.get(otherUser);
 		
 		
 		for(String content : targetUserScores.keySet()) {
-			//targetUser의 정규화 점수를 가져온다
+			//targetUser의 ID를 받아 해당ID의 targetUser의 정규화된 점수를 가져온
 			int targetUserScore = targetUserScores.get(content);
-			//targetUser의 정규화된 점수를 계산하고 ,SquaredSum에 해당 점수의 제곱을 누적시킨다.
+			
 			double targetUserNoramlizedScore = targetUserScore - targetUserAverage;
+			
 			targetUserSquaredSum += targetUserNoramlizedScore * targetUserNoramlizedScore;
 			
 			//otherUserScores에 해당 content항목이 있는지 확인한 후 있으면
@@ -299,14 +310,16 @@ public class HW1{
 		
 		//otherUserScores의 모든 점수를
 		for(int otherUserScore : otherUserScores.values()) {
-			//otherUserScore의 정규화된 점수를 전부 계산하고,
+			//otherUserScore의 정규화된 점수들을 전부 계산하고,
 			double otherUserNormalizedScore = otherUserScore - otherUserAverage;
 			//해당 점수의 제곱을 누적
 			otherUserSquaredSum += otherUserNormalizedScore * otherUserNormalizedScore;
 		}
 		
 		//targetUserSquaredSum과 otherUserSquaredSum의 제곱근을 계산
+		//targetUser벡터의 크기
 		targetUserSquaredSum = Math.sqrt(targetUserSquaredSum);
+		//otherUser벡터의 크기
 		otherUserSquaredSum = Math.sqrt(otherUserSquaredSum);
 		
 		//targetUser와 otherUser간의 코사인 유사도를 계산하고 반환
