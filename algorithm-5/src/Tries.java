@@ -82,7 +82,7 @@ public class Tries<Value> {
         Tries<String> tries = new Tries<>();
         String[] a = {"hello", "world", "tr", "trie", "tree", "algorithm"};
         
-        //¹®ÀÚ¿­ ¹è¿­ a¸¦ tries ÀÚ·á±¸Á¶¿¡ ÀúÀå(°ª »ðÀÔ)
+        //ï¿½ï¿½ï¿½Ú¿ï¿½ ï¿½è¿­ aï¿½ï¿½ tries ï¿½Ú·á±¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½(ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
         for(String s: a) {
             tries.put(s, s);
         }
@@ -94,15 +94,15 @@ public class Tries<Value> {
         	String input = sc.next();
         	
         	if("exit".equals(input)) {
-        		System.out.println("ÇÁ·Î±×·¥ Á¾·á");
+        		System.out.println("ï¿½ï¿½ï¿½Î±×·ï¿½ ï¿½ï¿½ï¿½ï¿½");
         		break;
         	}
         	
         	String result = tries.get(input);
         	if(result != null) {
-        		System.out.println("Ã£Àº °ª: " + result);
+        		System.out.println("Ã£ï¿½ï¿½ ï¿½ï¿½: " + result);
         	}else {
-        		System.out.println(input + "´Â Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.");
+        		System.out.println(input + "ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê½ï¿½ï¿½Ï´ï¿½.");
         	}
         }
         sc.close();

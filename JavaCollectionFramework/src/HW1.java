@@ -11,6 +11,7 @@ public class HW1{
 		int topN = sc.nextInt(); //유사도가 높은 상위n명
 		int topK = sc.nextInt(); //추천 컨텐츠 상위k개
 		
+		//예외처리
 		try {
 			File file = new File(fileName); //fileName으로 부터 입력받은 flie을 읽어온다.(일치할 시)
 			Scanner fileScanner = new Scanner(file); //해당 file을 스캔 //32L부터
@@ -24,7 +25,7 @@ public class HW1{
 			//콘텐츠와 그에 대한 점수(등장횟수 + 평가점수)를 저장 하는 맵
 			
 			HashMap<String, Integer> contentCounts = new HashMap<>();
-			//콘텐츠의 등장횟수를 추척재 맵에 저장하고 콘텐츠 평균 점수를 구하는데 사용
+			//콘텐츠의 등장횟수를 추척해 맵에 저장하고 콘텐츠 평균 점수를 구하는데 사용
 			
 			HashMap<String, Integer> targetUserContentScores = new HashMap<>();
 			//대상 사용자의 콘텐츠와 점수를 저장하는 맵, 대상 사용자가 평가한 콘텐츠와 그에 대한 점수를 저장
@@ -176,7 +177,7 @@ public class HW1{
 			}
 			
 			
-			//유사도 내림차순 정렬
+			//유사도 내림차순 정렬(2번은 유사도의 크기별로 정렬)
 			Collections.sort(similarityList, (o1, o2) -> {
 				if(o1.getValue() > o2.getValue()) {
 					return -1; //o1 o2
@@ -198,7 +199,6 @@ public class HW1{
 			System.out.print("\n\n");
 			
 			
-			
 			System.out.println("3. 사용자" + targetUser +"에게 추천할 콘텐츠와 추천 점수");
 			
 			//hashmap 생성
@@ -206,51 +206,67 @@ public class HW1{
 			
 			//유사도가 유사한 topN개의 리스트를
 			for(int i =0; i < topN; i++) {
-				//similarityList에서 key와 value값을 가져온다.
-				int similarUser = similarityList.get(i).getKey();//key = user id
-				double similarity = similarityList.get(i).getValue();//value = user 유사도 점수
-				//similarUserScores에 저장
+				//similarityList에서 key와 value값을 가져온다.(map.entry로 안가져온이유는 각각의 변수에 할당해 각각 다른 용도로 사용하기 위함)
+				//map.entry는 주로 출력이 목적인 경우나, key와 value의 관계를 명확하게 표현하고자 하기 위함임
+				
+				int similarUser = similarityList.get(i).getKey();//key = (유사도가 유사한 사용자ID) + 점수
+				double similarity = similarityList.get(i).getValue();
+				//value = targetUser와 유사한 otherUser간의 유사도
+				
+				//similarUserScores에 similarUser의 값을 저장
 				HashMap<String, Integer> similarUserScores = userContentScores.get(similarUser);
 				
-				//similarUserScores의 전체 값만큼 for문 실행
+				//유사도가 유사한 사용자의 ID만큼 content에 할당
 				for(String content : similarUserScores.keySet()) {
-					//targetUser가 평가하지 content
+					//targetUser가 content를 key로 가지는 값이 없다면(평가하지 않았다면)
 					if(!targetUserContentScores.containsKey(content)) {
-						//otherUserScore에 유사한사용자의 해당 콘텐츠를 저장
+						//참
+						//otherUserScore에 유사한사용자가 평가한 해당 콘텐츠의 점수 저장
 						int otherUserScore = similarUserScores.get(content);
-						//해당 콘텐츠에 대한 유사한 사용자의 정규화된 점수 계산(해당 사용자의 콘테츠 점수 - 해당 사용자의 평균 점수)
+						//유사한 사용자의 콘텐츠 평가점수를 가져온 후, 사용자의 콘텐츠 평균 점수로 정규화하여 차이를 계산
 						double otherUserNormalizedScore = otherUserScore - userAverages.get(similarUser);
-						//추천 점수 = 유사도 * 유사한 사용자의 정규화콘텐츠 점수의 곱
+						
+						//추천콘텐츠 선정: 유사도 * 유사한 사용자의 정규화 점수를 곱함
 						double recommendationScore = similarity * otherUserNormalizedScore;
-						//recommendationsScores에 해당 content와, content의 등장횟수 + 추천 점수를 더한값을 저장
+						//맵recommendationScores에 content의 key값을 가져와 content가 추천점수 업데이트
+						//targetUserContentScores에 content가 존재한다면 content 반환 없다면 0.0반환 둘 다 recommendationScore을 더한다
 						recommendationScores.put(content, recommendationScores.getOrDefault(content, 0.0) + recommendationScore);
-						//추천 점수가 가장 높은 상위 N개의 콘텐츠를 선택한다.
 					}
 				}
 			}
 			//추천 점수가 가장 높은 상위 N개의 콘텐츠를 recommendations안에 저장
+			
 			//recommendations ArrayList 선언
-			List<Map.Entry<String, Double>> recommendations = new ArrayList<>(recommendationScores.entrySet());
+			//entery.set을 이용해 맵의 값들을 가져온다
+			ArrayList<Map.Entry<String, Double>> recommendations = new ArrayList<>(recommendationScores.entrySet());
+			//우선 추천점수를 비교해 크면 앞으로 작으면 뒤로 보낸다.
+			//추천점수의 내림차순 정렬
 			recommendations.sort((o1, o2) -> {
 			    if (o1.getValue() > o2.getValue()) {
 			        return -1; //o1 o2
 			    } else if (o1.getValue() < o2.getValue()) {
 			        return 1; //o2 o1
-			    } else { //value값이 같다면
+			    } else { 
+			    	//value값이 같다면
 			    	//key의 오름차순으로 출력
 			    	Pattern pattern = Pattern.compile("(\\D+)(\\d+)");
 			    	Matcher m1 = pattern.matcher(o1.getKey());
 			    	Matcher m2 = pattern.matcher(o2.getKey());
 			    	if(m1.find() && m2.find()) {
+			    		//문자먼저 비교
 			    		int charCompare = m1.group(1).compareTo(m2.group(1));
+			    		//문자가 다르다면
 			    		if(charCompare != 0) {
+			    			//compareTo로 정렬한걸 반환
 			    			return charCompare;
+			    			//문자가 같다면 숫자부분 비교
 			    		}else {
 			    			int num1 = Integer.parseInt(m1.group(2));
 			    			int num2 = Integer.parseInt(m2.group(2));
 			    			return Integer.compare(num1, num2);
 			    		}
 			    	}
+			    	//value값이 같다면 key값으로 비교해 작은 수 부터 
 			    	return o1.getKey().compareTo(o2.getKey());
 			    }
 			});
@@ -275,14 +291,14 @@ public class HW1{
 		}
 	}
 
-	//유사도 계산
+	//유사도 두 벡터 간의 내적 / 벡터의 크기의 곱
 	private static double calculateCosineSimilarity(HashMap<String, Integer> targetUserScores,
 			//targetUser, otherUser 메서드, targetUserScore, otherUserScores 사용자의 평가 점수 맵, userAverages 평균 평점 맵을 인수로 받음 
 	HashMap<String, Integer> otherUserScores, HashMap<Integer, Double> userAverages, int targetUser, int otherUser) {
 		//Cosine유사도를 계산하기 위해 변수들을 초기화한다.
-		double dotProduct = 0.0;
-		double targetUserSquaredSum = 0.0;
-		double otherUserSquaredSum = 0.0;
+		double dotProduct = 0.0;//분자
+		double targetUserSquaredSum = 0.0;//targetUser 분모
+		double otherUserSquaredSum = 0.0;//targetUser 분모
 		
 		//각 사용자의 평균 평점을 가져온다.
 		double targetUserAverage = userAverages.get(targetUser);
@@ -290,20 +306,25 @@ public class HW1{
 		
 		
 		for(String content : targetUserScores.keySet()) {
-			//targetUser의 ID를 받아 해당ID의 targetUser의 정규화된 점수를 가져온
+			
+			//targetUser의 ID를 받아 해당ID의 targetUser의 콘텐츠 점수를 가져옴
 			int targetUserScore = targetUserScores.get(content);
 			
+			//targetUser의 점수에서 평균값을 뺀 값
 			double targetUserNoramlizedScore = targetUserScore - targetUserAverage;
 			
+			//targetUser 벡터의 크기(Normalized의 합):분모
 			targetUserSquaredSum += targetUserNoramlizedScore * targetUserNoramlizedScore;
 			
-			//otherUserScores에 해당 content항목이 있는지 확인한 후 있으면
+			
+			//다른 사용자들의 content가 존재하는지 확인
 			if(otherUserScores.containsKey(content)) {
-				//정규화된 점수를 가져온 뒤
+				//참
+				//콘텐츠 점수를 가져온뒤
 				int otherUserScore = otherUserScores.get(content);
 				//정규화된 점수를 계산
 				double otherUserNormalizedScore = otherUserScore - otherUserAverage;
-				//dotProduct에 targetUser와 otherUser의 정규화된 점수의 곱을 누적한다.
+				//각 벡터의 크기를 구했으면 분자도 구한다.
 				dotProduct += targetUserNoramlizedScore  * otherUserNormalizedScore;
 			}
 		}
@@ -312,22 +333,20 @@ public class HW1{
 		for(int otherUserScore : otherUserScores.values()) {
 			//otherUserScore의 정규화된 점수들을 전부 계산하고,
 			double otherUserNormalizedScore = otherUserScore - otherUserAverage;
-			//해당 점수의 제곱을 누적
+			//otheruser 벡터의 크기
 			otherUserSquaredSum += otherUserNormalizedScore * otherUserNormalizedScore;
 		}
 		
-		//targetUserSquaredSum과 otherUserSquaredSum의 제곱근을 계산
-		//targetUser벡터의 크기
+		//target와 otherUser의 제곱근을 계산
 		targetUserSquaredSum = Math.sqrt(targetUserSquaredSum);
-		//otherUser벡터의 크기
 		otherUserSquaredSum = Math.sqrt(otherUserSquaredSum);
 		
-		//targetUser와 otherUser간의 코사인 유사도를 계산하고 반환
+		//제곱근을마치고 분모가 0이라면
 		if(targetUserSquaredSum == 0.0 || otherUserSquaredSum == 0.0) {
-			//분모가 0인경우 유사도를 0으로 반환
-			return 0.0;
+			return 0.0;//0출력
 		}else {
-			//코사인 유사도 반환
+			//아니라면,
+			//계산한 코사인 유사도 반환
 			return dotProduct / (targetUserSquaredSum * otherUserSquaredSum);
 		}
 	}
